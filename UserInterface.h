@@ -1,32 +1,25 @@
-﻿/*
+﻿#pragma once
+/*
 Михаил Павлович Сидоренко ([SG]Muwa https://github.com/SGmuwa)
 Российский технологийческий университет
-Версия 1.0
+Версия 1.2
 
 Данный файл создан для упрощения работы программиста с консолью
 с помощью стандартных средств работы с консолью и файлами.
 */
 
+#ifndef _USERINTERFACE_H_
+#define _USERINTERFACE_H_
 #include <stdio.h>
+#include <math.h>
 
-void main(void) {}
+#ifdef CPP
+
+#endif // CPP
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-
-	// Возвращает NaN число.
-	float UserInterface_getNaNFloat()
-	{
-		if (sizeof(float) == sizeof(unsigned int)) {
-			float output = 0;
-			*((unsigned int *)&output) = 0xFFFFFFFF;
-			return output;
-		}
-		else
-			return 0.0 / 0.0;
-	}
 
 	// ------------------------------- FILE -------------------------------------------------
 
@@ -61,7 +54,7 @@ extern "C"
 	unsigned UserInterface_fGetUnsignedInt(const char * message, FILE * fpIN, FILE * fpOUT)
 	{
 		if (fpIN == NULL) return 0;
-		unsigned buffer = ~0;
+		unsigned buffer = ~0u;
 		unsigned char tryLimit = 0;
 		while (--tryLimit != 0)
 		{
@@ -190,9 +183,9 @@ extern "C"
 	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
 	float UserInterface_fGetFloat(const char * message, FILE * fpIN, FILE * fpOUT)
 	{
-		if (fpIN == NULL) return UserInterface_getNaNFloat();
+		if (fpIN == NULL) return nanf(NULL);
 		unsigned char tryLimit = 0;
-		float buffer = UserInterface_getNaNFloat();
+		float buffer = nanf(NULL);
 		while (--tryLimit != 0)
 		{
 			if (fpOUT != NULL)
@@ -206,6 +199,50 @@ extern "C"
 				fscanf_s(fpIN, "%f", &buffer)
 #else
 				fscanf(fpIN, "%f", &buffer)
+#endif // _MSC_VER
+				>= 1 // Не совсем уверен, как работает %*s. Поэтому знак >=.
+				)
+			{
+				break;
+			}
+#ifdef _MSC_VER
+			fscanf_s(fpIN, "%*s");
+#else
+			fscanf(fpIN, "%*s");
+#endif // _MSC_VER
+		}
+#ifdef _MSC_VER
+		fscanf_s(fpIN, "%*c");
+#else
+		fscanf(fpIN, "%*c");
+#endif // _MSC_VER
+		return buffer;
+	}
+
+	// Получает от fpIN число с плавающей точкой двойной точности.
+	// const char * message: Сообщение, которое необходимо вывести. В Случае NULL сообщение не будет выведено.
+	// FILE * fpIN: Поток ввода информация. В случае NULL функция вернёт NaN.
+	// FILE * fpOUT: Поток вывода информации. В случае NULL сообщение не будет выведено.
+	// Возвращает: прочитанное от пользователя число.
+	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
+	double UserInterface_fGetDouble(const char * message, FILE * fpIN, FILE * fpOUT)
+	{
+		if (fpIN == NULL) return nan(NULL);
+		unsigned char tryLimit = 0;
+		double buffer = nan(NULL);
+		while (--tryLimit != 0)
+		{
+			if (fpOUT != NULL)
+#ifdef _MSC_VER
+				fprintf_s(fpOUT, "%s", message);
+#else
+				fprintf(fpOUT, "%s", message);
+#endif // _MSC_VER
+			if (
+#ifdef _MSC_VER
+				fscanf_s(fpIN, "%lf", &buffer)
+#else
+				fscanf(fpIN, "%lf", &buffer)
 #endif // _MSC_VER
 				>= 1 // Не совсем уверен, как работает %*s. Поэтому знак >=.
 				)
@@ -366,7 +403,7 @@ extern "C"
 				fscanf(fpIN, "%*s");
 #endif // _MSC_VER
 			}
-			buffer = ~(unsigned char)0u;
+			buffer = 255u;
 		}
 #ifdef _MSC_VER
 		fscanf_s(fpIN, "%*c");
@@ -405,13 +442,40 @@ extern "C"
 		return UserInterface_fGetUnsignedInt(message, stdin, stdout);
 	}
 
-	// Получает от стандартного ввода-вывода число с плавающей точкой.
+	// Получает от стандартного ввода-вывода число с плавающей точкой одинарной точности.
 	// const char * message: Сообщение, которое необходимо вывести. В случае NULL сообщение не будет выведено.
 	// Возвращает: прочитанное от пользователя число.
 	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
 	float UserInterface_GetFloat(const char * message)
 	{
 		return UserInterface_fGetFloat(message, stdin, stdout);
+	}
+
+	// Получает от стандартного ввода-вывода число с плавающей точкой двойной точности.
+	// const char * message: Сообщение, которое необходимо вывести. В случае NULL сообщение не будет выведено.
+	// Возвращает: Прочитанное от пользователя число.
+	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
+	double UserInterface_GetDouble(const char * message)
+	{
+		return UserInterface_fGetDouble(message, stdin, stdout);
+	}
+
+	// Получает от стандартного ввода-вывода число с плавующей точкой двойной точности в заданных границах.
+	// const char * message: Сообщение, которое необходимо вывести. В случае NULL сообщение не будет выведено.
+	// double min: Минимальное разрешённое число для ввода. Если отправить NaN, функция вернёт NaN без вывода сообщения. Если минимальное число больше максимального, то возвращается NaN.
+	// double max: Максимальное разрешённое число для ввода. Если отправить NaN, функция вернёт NaN без вывода сообщения.
+	// Возвращает: Прочитанное от пользователя число. 
+	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
+	double UserInterface_GetDoubleLimit(const char * message, double min, double max)
+	{
+		if (isnan(min) || isnan(max) || min > max)
+			return nan(NULL);
+		double buffer;
+		do
+		{
+			buffer = UserInterface_GetDouble(message);
+		} while (buffer < min || buffer > max || isnan(buffer));
+		return buffer;
 	}
 
 	// Запрашивает текстовые данные от пользователя через стандартные потоки ввода-вывода. Для того, чтобы закончить набирать текстовую информацию, пользователю необходимо отправить любой из следующий символов: \0 \1 \2 \3 \4 \5 \6 \7 \8.
@@ -443,6 +507,22 @@ extern "C"
 	{
 		if (min > max) return min;
 		unsigned buffer;
+		do
+		{
+			buffer = UserInterface_GetUnsignedInt(message);
+		} while (buffer < min || buffer > max);
+		return buffer;
+	}
+
+	// Получает от пользователя int число в допустимом диапазоне.
+	// const char * message: сообщение, которое будет выведено перед запросом.
+	// int min: минимально допустимое число, которое будет возвращено. Если min > max, то будет возвращено min без ожидания ответа пользователя и не печатая message.
+	// int max: максимально допустимое число, которое будет возвращено.
+	// Возвращает: unsigned int от пользователя.
+	int UserInterface_GetIntLimit(const char * message, int min, int max)
+	{
+		if (min > max) return min;
+		int buffer;
 		do
 		{
 			buffer = UserInterface_GetUnsignedInt(message);
@@ -503,5 +583,7 @@ extern "C"
 	}
 
 #ifdef __cplusplus
-} // extern C
-#endif // __cplusplus
+}
+#endif
+
+#endif //_USERINTERFACE_H_
