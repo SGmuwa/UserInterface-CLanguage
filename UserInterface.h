@@ -2,20 +2,14 @@
 /*
 Михаил Павлович Сидоренко ([SG]Muwa https://github.com/SGmuwa)
 Российский технологийческий университет
-Версия 1.2
+Версия 1.3
 
 Данный файл создан для упрощения работы программиста с консолью
 с помощью стандартных средств работы с консолью и файлами.
 */
 
-#ifndef _USERINTERFACE_H_
-#define _USERINTERFACE_H_
 #include <stdio.h>
 #include <math.h>
-
-#ifdef CPP
-
-#endif // CPP
 
 #ifdef __cplusplus
 extern "C" {
@@ -586,4 +580,3 @@ extern "C" {
 }
 #endif
 
-#endif //_USERINTERFACE_H_
