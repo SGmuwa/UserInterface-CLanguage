@@ -11,6 +11,11 @@
 #include <stdio.h>
 #include <math.h>
 
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(_WIN86) || defined(WIN86)
+#include <Windows.h>
+#endif // _WIN32
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -544,7 +549,16 @@ extern "C" {
 	// const char * message: Сообщение, которое будет выведено перед паузой. Если отправить NULL, сообщение не будет выведено.
 	void UserInterface_Pause(const char * message)
 	{
+#ifdef _WINDOWS_
+#ifdef _MSC_VER
+		printf_s("%s", message);
+#else
+		printf("%s", message);
+#endif
+		system("pause");
+#else
 		UserInterface_fPause(message, stdin, stdout);
+#endif // _WINDOWS_
 	}
 
 	FILE * UserInterface_OpenFile(const char * message, const char * mode)
