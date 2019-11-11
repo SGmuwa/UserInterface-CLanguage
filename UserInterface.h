@@ -2,7 +2,7 @@
 /*
 Михаил Павлович Сидоренко ([SG]Muwa https://github.com/SGmuwa)
 Российский технологийческий университет
-Версия 1.2
+Версия 1.3
 
 Данный файл создан для упрощения работы программиста с консолью
 с помощью стандартных средств работы с консолью и файлами.
@@ -183,9 +183,9 @@ extern "C" {
 	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
 	float UserInterface_fGetFloat(const char * message, FILE * fpIN, FILE * fpOUT)
 	{
-		if (fpIN == NULL) return nanf(NULL);
+		if (fpIN == NULL) return nanf("");
 		unsigned char tryLimit = 0;
-		float buffer = nanf(NULL);
+		float buffer = nanf("");
 		while (--tryLimit != 0)
 		{
 			if (fpOUT != NULL)
@@ -227,9 +227,9 @@ extern "C" {
 	// Ошибки: если пользователь ошибётся 255 раз, то функция вернёт NaN.
 	double UserInterface_fGetDouble(const char * message, FILE * fpIN, FILE * fpOUT)
 	{
-		if (fpIN == NULL) return nan(NULL);
+		if (fpIN == NULL) return nan("");
 		unsigned char tryLimit = 0;
-		double buffer = nan(NULL);
+		double buffer = nan("");
 		while (--tryLimit != 0)
 		{
 			if (fpOUT != NULL)
@@ -469,7 +469,7 @@ extern "C" {
 	double UserInterface_GetDoubleLimit(const char * message, double min, double max)
 	{
 		if (isnan(min) || isnan(max) || min > max)
-			return nan(NULL);
+			return nan("");
 		double buffer;
 		do
 		{
@@ -577,7 +577,7 @@ extern "C" {
 	// Спрашивает у пользователя 1 байт информации от 0 включительно до максимально допустимого.
 	// const char * message: Сообщение, которое будет выведено перед запросом. Если отправить NULL, сообщение не будет выведено.
 	// Возвращает: Целое неотрицательное число, которое было получено из потока ввода.
-	unsigned char UserInterface_GetChek(const char * message, unsigned char maxAccess)
+	unsigned char UserInterface_GetCheck(const char * message, unsigned char maxAccess)
 	{
 		return UserInterface_fGetChek(message, maxAccess, stdin, stdout);
 	}
